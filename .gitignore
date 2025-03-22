@@ -3,3 +3,8 @@ logs/
 *.so
 *.tar.gz
 *.deb
+logs/
+*.log
+*.so
+*.tar.gz
+*.deb
