@@ -1,0 +1,3 @@
+#!/bin/bash
+source $HOME/.dominancex/config/config.cfg
+scp "$LOG_PATH" "${SYNC_REMOTE_USER}@${SYNC_REMOTE_HOST}:${SYNC_REMOTE_PATH}"

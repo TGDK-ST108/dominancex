@@ -1,0 +1,12 @@
+#!/bin/bash
+CFG=$HOME/.dominancex/config/config.cfg
+KEY=$2
+VAL=$3
+case "$1" in
+  whitelist) sed -i "/WHITELIST_IP=/ s/$/,$VAL/" "$CFG"; echo "Whitelisted IP: $VAL" ;;
+  port) sed -i "/WHITELIST_PORT=/ s/$/,$VAL/" "$CFG"; echo "Whitelisted Port: $VAL" ;;
+  block) sed -i "/BLOCK_DOMAINS=/ s/$/,$VAL/" "$CFG"; echo "Blocked Domain: $VAL" ;;
+  reload) pkill -HUP -f libdominancex.so; echo "Reloaded rules." ;;
+  show) cat "$CFG" ;;
+  *) echo "Usage: domctl [whitelist|port|block|reload|show] [value]";;
+esac
