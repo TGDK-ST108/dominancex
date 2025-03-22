@@ -63,3 +63,27 @@ DominanceX is highly customizable and can integrate with various services, inclu
 
 © 2025 Sean Tichenor | TGDK - All Rights Reserved.
 
+// ====================================================================  
+//                             TGDK BFE LICENSE                        
+// ====================================================================  
+//                          BROADCASTED FEE ENTRY                      
+// ====================================================================  
+// LICENSE HOLDER:              |  Sean Tichenor                        
+// LICENSE CODE:                |  BFE-TGDK-DXFW-105ST                  
+// DATE OF ISSUANCE:            |  March 22, 2025                       
+// LICENSE STATUS:              |  ACTIVE                               
+// ISSUING AUTHORITY:           |  TGDK Licensing Authority             
+// ====================================================================  
+// DESCRIPTION:  
+// DominanceX Firewall: Advanced modular firewall with socket-level
+// interception, AES-256 encrypted logging, real-time AI adaptive
+// threat blocking, OliviaAI integration, and network traffic control.  
+// ====================================================================  
+// NOTICE:  
+// Unauthorized duplication, modification, or redistribution of this  
+// software or license is strictly prohibited under TGDK regulatory  
+// compliance. Violations will be legally pursued.                     
+// ====================================================================  
+//                           FOR OFFICIAL USE ONLY                     
+// ====================================================================
+
