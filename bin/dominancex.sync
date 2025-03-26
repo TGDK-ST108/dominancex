@@ -1,3 +1,48 @@
 #!/bin/bash
-source $HOME/.dominancex/config/config.cfg
+
+# =====================================================
+# TGDK :: DominanceX Sync Utility
+# AGENT: H6
+# LICENSE: BFE-TGDK-022ST
+# =====================================================
+
+# Environment detection
+if [[ "$OSTYPE" == "android"* || "$TERMUX_VERSION" != "" ]]; then
+    export TGDK_HOME="$HOME/Makeshift"
+else
+    export TGDK_HOME="$HOME/dominancex"
+fi
+
+CFG="$TGDK_HOME/.dominancex/config/config.cfg"
+
+# Ensure config exists
+if [[ ! -f "$CFG" ]]; then
+    echo "[sync] Config not found: $CFG"
+    exit 1
+fi
+
+# Load config
+source "$CFG"
+
+# Validation
+if [[ -z "$LOG_PATH" || -z "$SYNC_REMOTE_USER" || -z "$SYNC_REMOTE_HOST" || -z "$SYNC_REMOTE_PATH" ]]; then
+    echo "[sync] Missing required fields in config:"
+    echo "        LOG_PATH, SYNC_REMOTE_USER, SYNC_REMOTE_HOST, SYNC_REMOTE_PATH"
+    exit 1
+fi
+
+# Confirm file exists
+if [[ ! -f "$LOG_PATH" ]]; then
+    echo "[sync] Log file not found: $LOG_PATH"
+    exit 1
+fi
+
+# Perform sync
+echo "[sync] Transferring log to ${SYNC_REMOTE_USER}@${SYNC_REMOTE_HOST}:${SYNC_REMOTE_PATH}"
 scp "$LOG_PATH" "${SYNC_REMOTE_USER}@${SYNC_REMOTE_HOST}:${SYNC_REMOTE_PATH}"
+
+if [[ $? -eq 0 ]]; then
+    echo "[sync] Transfer complete."
+else
+    echo "[sync] Transfer failed."
+fi
