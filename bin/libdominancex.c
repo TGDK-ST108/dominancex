@@ -50,7 +50,6 @@ int open(const char *pathname, int flags, ...) {
 }
 
 // Config defaults (these can be loaded from file or hardcoded)
-const char *blocked_domains[] = { "example.com", "badsite.org", "amazon.com", "aws.com", NULL };
 const int blocked_ports[] = { 23, 445, 3389, 3306, 0 };  // 0 = end marker
 const char *whitelist_ips[] = { "127.0.0.1", "192.168.1.1", NULL };
 const int whitelist_ports[] = { 22, 53, 443, 0 };
