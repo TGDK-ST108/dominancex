@@ -3,41 +3,50 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dlfcn.h>
-#include <unistd.h>
+#include <stdarg.h>
 #include <fcntl.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <arpa/inet.h>
-#include <stdarg.h> // Needed for va_list
+#include <netinet/in.h>
 
+// === CONFIG ===
+const char *blocked_domains[] = {
+    "example.com", "badsite.org", "amazon.com", "aws.com", NULL
+};
+#define TGDK_LOG "/data/data/com.termux/files/home/tgdk105/dominancex_intercept.log"
+
+// === OPEN INTERCEPTOR ===
 int open(const char *pathname, int flags, ...) {
-    static int (*real_open)(const char *, int, mode_t) = NULL;
-    if (!real_open)
-        real_open = dlsym(RTLD_NEXT, "open");
+    static int (*real_open)(const char *, int, ...) = NULL;
+    if (!real_open) real_open = dlsym(RTLD_NEXT, "open");
 
-    mode_t mode = 0;
-    if (flags & O_CREAT) {
-        va_list args;
-        va_start(args, flags);
-        mode = va_arg(args, mode_t);
-        va_end(args);
-    }
-
-    // Block specific domain paths
+    // Block pathnames matching bad domains
     for (int i = 0; blocked_domains[i] != NULL; i++) {
         if (strstr(pathname, blocked_domains[i])) {
             FILE *log = fopen(TGDK_LOG, "a");
-            fprintf(log, "[DOMINANCEX] BLOCKED OPEN ON: %s\n", pathname);
-            fclose(log);
+            if (log) {
+                fprintf(log, "[DOMINANCEX] BLOCKED OPEN ON: %s\n", pathname);
+                fclose(log);
+            }
             return -1;
         }
     }
 
+    va_list args;
+    va_start(args, flags);
+    int fd;
+
     if (flags & O_CREAT) {
-        return real_open(pathname, flags, mode);
+        mode_t mode = va_arg(args, mode_t);
+        fd = real_open(pathname, flags, mode);
     } else {
-        return real_open(pathname, flags);
+        fd = real_open(pathname, flags);
     }
+
+    va_end(args);
+    return fd;
 }
 
 // Config defaults (these can be loaded from file or hardcoded)
