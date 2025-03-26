@@ -8,6 +8,37 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <stdarg.h> // Needed for va_list
+
+int open(const char *pathname, int flags, ...) {
+    static int (*real_open)(const char *, int, mode_t) = NULL;
+    if (!real_open)
+        real_open = dlsym(RTLD_NEXT, "open");
+
+    mode_t mode = 0;
+    if (flags & O_CREAT) {
+        va_list args;
+        va_start(args, flags);
+        mode = va_arg(args, mode_t);
+        va_end(args);
+    }
+
+    // Block specific domain paths
+    for (int i = 0; blocked_domains[i] != NULL; i++) {
+        if (strstr(pathname, blocked_domains[i])) {
+            FILE *log = fopen(TGDK_LOG, "a");
+            fprintf(log, "[DOMINANCEX] BLOCKED OPEN ON: %s\n", pathname);
+            fclose(log);
+            return -1;
+        }
+    }
+
+    if (flags & O_CREAT) {
+        return real_open(pathname, flags, mode);
+    } else {
+        return real_open(pathname, flags);
+    }
+}
 
 // Config defaults (these can be loaded from file or hardcoded)
 const char *blocked_domains[] = { "example.com", "badsite.org", "amazon.com", "aws.com", NULL };
@@ -38,22 +69,4 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
     }
 
     return real_connect(sockfd, addr, addrlen);
-}
-
-// Intercept `open`
-int open(const char *pathname, int flags, ...) {
-    static int (*real_open)(const char *, int, mode_t) = NULL;
-    if (!real_open)
-        real_open = dlsym(RTLD_NEXT, "open");
-
-    for (int i = 0; blocked_domains[i] != NULL; i++) {
-        if (strstr(pathname, blocked_domains[i])) {
-            FILE *log = fopen(TGDK_LOG, "a");
-            fprintf(log, "[DOMINANCEX] BLOCKED OPEN ON: %s\n", pathname);
-            fclose(log);
-            return -1;
-        }
-    }
-
-    return real_open(pathname, flags);
 }
