@@ -1,12 +1,56 @@
 #!/bin/bash
-CFG=$HOME/.dominancex/config/config.cfg
-KEY=$2
-VAL=$3
+
+# =====================================================
+# TGDK :: DominanceX Control Utility (domctl)
+# AGENT: H6
+# LICENSE: BFE-TGDK-022ST
+# =====================================================
+
+# Fallback home for mobile or adaptive shell
+if [[ "$OSTYPE" == "android"* || "$TERMUX_VERSION" != "" ]]; then
+    export TGDK_HOME="$HOME/Makeshift"
+else
+    export TGDK_HOME="$HOME/dominancex"
+fi
+
+CFG="$TGDK_HOME/.dominancex/config/config.cfg"
+KEY="$2"
+VAL="$3"
+
+# Ensure config file exists
+if [[ ! -f "$CFG" ]]; then
+    echo "[domctl] Config not found: $CFG"
+    echo "[domctl] Creating default config..."
+    mkdir -p "$(dirname "$CFG")"
+    cat <<EOF > "$CFG"
+WHITELIST_IP=
+WHITELIST_PORT=
+BLOCK_DOMAINS=
+EOF
+fi
+
+# Action router
 case "$1" in
-  whitelist) sed -i "/WHITELIST_IP=/ s/$/,$VAL/" "$CFG"; echo "Whitelisted IP: $VAL" ;;
-  port) sed -i "/WHITELIST_PORT=/ s/$/,$VAL/" "$CFG"; echo "Whitelisted Port: $VAL" ;;
-  block) sed -i "/BLOCK_DOMAINS=/ s/$/,$VAL/" "$CFG"; echo "Blocked Domain: $VAL" ;;
-  reload) pkill -HUP -f libdominancex.so; echo "Reloaded rules." ;;
-  show) cat "$CFG" ;;
-  *) echo "Usage: domctl [whitelist|port|block|reload|show] [value]";;
+  whitelist)
+    sed -i "/^WHITELIST_IP=/ s/$/,$VAL/" "$CFG"
+    echo "[domctl] Whitelisted IP: $VAL"
+    ;;
+  port)
+    sed -i "/^WHITELIST_PORT=/ s/$/,$VAL/" "$CFG"
+    echo "[domctl] Whitelisted Port: $VAL"
+    ;;
+  block)
+    sed -i "/^BLOCK_DOMAINS=/ s/$/,$VAL/" "$CFG"
+    echo "[domctl] Blocked Domain: $VAL"
+    ;;
+  reload)
+    pkill -HUP -f libdominancex.so && echo "[domctl] Rules reloaded." || echo "[domctl] Reload failed."
+    ;;
+  show)
+    echo "[domctl] Current config:"
+    cat "$CFG"
+    ;;
+  *)
+    echo "[domctl] Usage: domctl [whitelist|port|block|reload|show] [value]"
+    ;;
 esac
